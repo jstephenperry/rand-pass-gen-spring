@@ -10,72 +10,62 @@ import java.util.List;
 @ShellComponent
 public class RandomPasswordGenerator {
 
-    @ShellMethod
-    public static String generatePassword(int length, PasswordComplexityEnum complexity) {
-        return switch (complexity) {
-            case LOW -> generateLowComplexityPassword(length);
-            case MEDIUM -> generateMediumComplexityPassword(length);
-            case HIGH -> generateHighComplexityPassword(length);
-        };
+    private RandomPasswordGenerator() {
     }
 
-    @ShellMethod
-    public static List<String> generatePasswordList(int listLength, int passwdLength, PasswordComplexityEnum complexity) {
+    @ShellMethod("Generate a single password")
+    public static String generatePassword(int length, PasswordComplexityEnum complexity) {
+        return generatePasswordInternal(length, complexity);
+    }
+
+    @ShellMethod("Generate a list of passwords")
+    public static List<String> generatePasswordList(int listLength, int length, PasswordComplexityEnum complexity) {
 
         List<String> passwordList = new ArrayList<>();
 
         for (int i = 0; i < listLength; i++) {
-
-            passwordList.add(switch (complexity) {
-
-                case LOW -> generateLowComplexityPassword(passwdLength);
-                case MEDIUM -> generateMediumComplexityPassword(passwdLength);
-                case HIGH -> generateHighComplexityPassword(passwdLength);
-            });
+            passwordList.add(generatePasswordInternal(length, complexity));
         }
 
         return passwordList;
     }
 
-    private static String generateLowComplexityPassword(int length) {
-
-        SecureRandom random = new SecureRandom();
+    private static String generatePasswordInternal(int length, PasswordComplexityEnum complexity) {
         StringBuilder builder = new StringBuilder();
-
-        for (int i = 0; i < length; i++) {
-            builder.append((char) random.nextInt(97,122));
-        }
-
-        return builder.toString();
-    }
-
-    private static String generateMediumComplexityPassword(int length) {
         SecureRandom random = new SecureRandom();
-        StringBuilder builder = new StringBuilder();
-
         int charInsertMode;
 
         for (int i = 0; i < length; i++) {
+
+            charInsertMode = switch (complexity) {
+                case LOW -> random.nextInt(1, 3);
+                case MEDIUM -> random.nextInt(1, 4);
+                case HIGH -> random.nextInt(1, 5);
+            };
+
             if (builder.isEmpty()) {
-                charInsertMode = random.nextInt(1,3);
-                builder.append(charInsertMode == 1 ?
-                        (char) random.nextInt(65, 90) :
-                        (char) random.nextInt(97, 122));
-            } else {
-                charInsertMode = random.nextInt(1,4);
+
+                // Ensure that passwords start with a character
                 builder.append(switch (charInsertMode) {
-                    case 1 -> (char) random.nextInt(65,90);
-                    case 2 -> (char) random.nextInt(97, 122);
-                    case 3 -> (char) random.nextInt(48,57);
+                    case 1 -> AsciiUtil.getRandomLower(random);
+                    case 2 -> AsciiUtil.getRandomUpper(random);
+                    case 3, 4 -> random.nextFloat() < .5
+                            ? AsciiUtil.getRandomUpper(random)
+                            : AsciiUtil.getRandomLower(random);
+                    default -> throw new IllegalStateException("Unexpected value: " + charInsertMode);
+                });
+            } else {
+
+                builder.append(switch (charInsertMode) {
+                    case 1 -> AsciiUtil.getRandomLower(random);
+                    case 2 -> AsciiUtil.getRandomUpper(random);
+                    case 3 -> AsciiUtil.getRandomDigit(random);
+                    case 4 -> AsciiUtil.getRandomSpecialCharacter(random);
                     default -> throw new IllegalStateException("Unexpected value: " + charInsertMode);
                 });
             }
         }
 
         return builder.toString();
-    }
-
-    private static String generateHighComplexityPassword(int length) {
-        return "";
     }
 }
