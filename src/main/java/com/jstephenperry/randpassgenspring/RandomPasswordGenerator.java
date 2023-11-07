@@ -4,6 +4,7 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.simple.RandomSource;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellOption;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,12 +16,15 @@ public class RandomPasswordGenerator {
     }
 
     @ShellMethod("Generate a single password")
-    public static String generatePassword(int length, String complexity) {
+    public static String generatePassword(@ShellOption int length,
+                                          @ShellOption String complexity) {
         return generatePasswordInternal(length, complexity);
     }
 
     @ShellMethod("Generate a list of passwords")
-    public static List<String> generatePasswordList(int listLength, int length, String complexity) {
+    public static List<String> generatePasswordList(@ShellOption int listLength,
+                                                    @ShellOption int length,
+                                                    @ShellOption String complexity) {
 
         List<String> passwordList = new ArrayList<>();
 
@@ -31,7 +35,8 @@ public class RandomPasswordGenerator {
         return passwordList;
     }
 
-    private static String generatePasswordInternal(int length, String complexity) {
+    private static String generatePasswordInternal(int length,
+                                                   String complexity) {
         StringBuilder builder = new StringBuilder();
         UniformRandomProvider rngProvider = RandomSource.XO_RO_SHI_RO_1024_SS.create();
         int charInsertMode;
