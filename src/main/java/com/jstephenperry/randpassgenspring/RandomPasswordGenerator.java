@@ -1,9 +1,10 @@
 package com.jstephenperry.randpassgenspring;
 
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.simple.RandomSource;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,12 +15,12 @@ public class RandomPasswordGenerator {
     }
 
     @ShellMethod("Generate a single password")
-    public static String generatePassword(int length, PasswordComplexityEnum complexity) {
+    public static String generatePassword(int length, String complexity) {
         return generatePasswordInternal(length, complexity);
     }
 
     @ShellMethod("Generate a list of passwords")
-    public static List<String> generatePasswordList(int listLength, int length, PasswordComplexityEnum complexity) {
+    public static List<String> generatePasswordList(int listLength, int length, String complexity) {
 
         List<String> passwordList = new ArrayList<>();
 
@@ -30,37 +31,37 @@ public class RandomPasswordGenerator {
         return passwordList;
     }
 
-    private static String generatePasswordInternal(int length, PasswordComplexityEnum complexity) {
+    private static String generatePasswordInternal(int length, String complexity) {
         StringBuilder builder = new StringBuilder();
-        SecureRandom random = new SecureRandom();
+        UniformRandomProvider rngProvider = RandomSource.XO_RO_SHI_RO_1024_SS.create();
         int charInsertMode;
 
         for (int i = 0; i < length; i++) {
 
-            charInsertMode = switch (complexity) {
-                case LOW -> random.nextInt(1, 3);
-                case MEDIUM -> random.nextInt(1, 4);
-                case HIGH -> random.nextInt(1, 5);
+            charInsertMode = switch (PasswordComplexityEnum.valueOf(complexity.toUpperCase())) {
+                case LOW -> rngProvider.nextInt(1, 3);
+                case MEDIUM -> rngProvider.nextInt(1, 4);
+                case HIGH -> rngProvider.nextInt(1, 5);
             };
 
             if (builder.isEmpty()) {
 
                 // Ensure that passwords start with a character
                 builder.append(switch (charInsertMode) {
-                    case 1 -> AsciiUtil.getRandomLower(random);
-                    case 2 -> AsciiUtil.getRandomUpper(random);
-                    case 3, 4 -> random.nextFloat() < .5
-                            ? AsciiUtil.getRandomUpper(random)
-                            : AsciiUtil.getRandomLower(random);
+                    case 1 -> AsciiUtil.getRandomLower(rngProvider);
+                    case 2 -> AsciiUtil.getRandomUpper(rngProvider);
+                    case 3, 4 -> rngProvider.nextFloat() < .5
+                            ? AsciiUtil.getRandomUpper(rngProvider)
+                            : AsciiUtil.getRandomLower(rngProvider);
                     default -> throw new IllegalStateException("Unexpected value: " + charInsertMode);
                 });
             } else {
 
                 builder.append(switch (charInsertMode) {
-                    case 1 -> AsciiUtil.getRandomLower(random);
-                    case 2 -> AsciiUtil.getRandomUpper(random);
-                    case 3 -> AsciiUtil.getRandomDigit(random);
-                    case 4 -> AsciiUtil.getRandomSpecialCharacter(random);
+                    case 1 -> AsciiUtil.getRandomLower(rngProvider);
+                    case 2 -> AsciiUtil.getRandomUpper(rngProvider);
+                    case 3 -> AsciiUtil.getRandomDigit(rngProvider);
+                    case 4 -> AsciiUtil.getRandomSpecialCharacter(rngProvider);
                     default -> throw new IllegalStateException("Unexpected value: " + charInsertMode);
                 });
             }

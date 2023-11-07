@@ -1,45 +1,45 @@
 package com.jstephenperry.randpassgenspring;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.simple.RandomSource;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import java.security.SecureRandom;
 
 @ExtendWith(SpringExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AsciiUtilTest {
 
-    private SecureRandom secureRandom;
+    private UniformRandomProvider provider;
 
     @BeforeAll
     void setup() {
-        secureRandom = new SecureRandom();
+        provider = RandomSource.XO_RO_SHI_RO_1024_SS.create();
     }
 
     @AfterAll
     void teardown() {
-        secureRandom = null;
+        provider = null;
     }
 
     @Test
     void testGetRandomAlphaLower() {
-        Assertions.assertTrue(String.valueOf(AsciiUtil.getRandomLower(secureRandom)).matches("^[a-z]"));
+        Assertions.assertTrue(String.valueOf(AsciiUtil.getRandomLower(provider)).matches("^[a-z]"));
     }
 
     @Test
     void testGetRandomAlphaUpper() {
-        Assertions.assertTrue(String.valueOf(AsciiUtil.getRandomUpper(secureRandom)).matches("^[A-Z]"));
+        Assertions.assertTrue(String.valueOf(AsciiUtil.getRandomUpper(provider)).matches("^[A-Z]"));
     }
 
     @Test
     void testGetRandomAsciiNumber() {
-        Assertions.assertTrue(String.valueOf(AsciiUtil.getRandomDigit(secureRandom)).matches("^[0-9]"));
+        Assertions.assertTrue(String.valueOf(AsciiUtil.getRandomDigit(provider)).matches("^[0-9]"));
     }
 
     @Test
     void testGetRandomSpecialCharacter() {
-        Assertions.assertTrue(ArrayUtils.contains(AsciiUtil.getSpecialCharArray(), AsciiUtil.getRandomSpecialCharacter(secureRandom)));
+        Assertions.assertTrue(ArrayUtils.contains(AsciiUtil.getSpecialCharArray(), AsciiUtil.getRandomSpecialCharacter(provider)));
     }
 }
