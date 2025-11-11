@@ -1,45 +1,83 @@
 package com.jstephenperry.randpassgenspring;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.simple.RandomSource;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.security.SecureRandom;
 
 @ExtendWith(SpringExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AsciiUtilTest {
 
-    private UniformRandomProvider provider;
+    private SecureRandom secureRandom;
 
     @BeforeAll
     void setup() {
-        provider = RandomSource.XO_RO_SHI_RO_1024_SS.create();
+        secureRandom = new SecureRandom();
     }
 
     @AfterAll
     void teardown() {
-        provider = null;
+        secureRandom = null;
     }
 
     @Test
     void testGetRandomAlphaLower() {
-        Assertions.assertTrue(String.valueOf(AsciiUtil.getRandomLower(provider)).matches("^[a-z]"));
+        for (int i = 0; i < 100; i++) {
+            char c = AsciiUtil.getRandomLower(secureRandom);
+            Assertions.assertTrue(String.valueOf(c).matches("^[a-z]"),
+                    "Expected lowercase letter, got: " + c);
+        }
     }
 
     @Test
     void testGetRandomAlphaUpper() {
-        Assertions.assertTrue(String.valueOf(AsciiUtil.getRandomUpper(provider)).matches("^[A-Z]"));
+        for (int i = 0; i < 100; i++) {
+            char c = AsciiUtil.getRandomUpper(secureRandom);
+            Assertions.assertTrue(String.valueOf(c).matches("^[A-Z]"),
+                    "Expected uppercase letter, got: " + c);
+        }
     }
 
     @Test
     void testGetRandomAsciiNumber() {
-        Assertions.assertTrue(String.valueOf(AsciiUtil.getRandomDigit(provider)).matches("^[0-9]"));
+        for (int i = 0; i < 100; i++) {
+            char c = AsciiUtil.getRandomDigit(secureRandom);
+            Assertions.assertTrue(String.valueOf(c).matches("^[0-9]"),
+                    "Expected digit, got: " + c);
+        }
     }
 
     @Test
     void testGetRandomSpecialCharacter() {
-        Assertions.assertTrue(ArrayUtils.contains(AsciiUtil.getSpecialCharArray(), AsciiUtil.getRandomSpecialCharacter(provider)));
+        for (int i = 0; i < 100; i++) {
+            char c = AsciiUtil.getRandomSpecialCharacter(secureRandom);
+            Assertions.assertTrue(ArrayUtils.contains(AsciiUtil.getSpecialCharArray(), c),
+                    "Expected special character from allowed set, got: " + c);
+        }
+    }
+
+    @Test
+    void testRandomnessDistribution() {
+        // Test that we get a variety of characters (basic randomness check)
+        java.util.Set<Character> lowerChars = new java.util.HashSet<>();
+        java.util.Set<Character> upperChars = new java.util.HashSet<>();
+        java.util.Set<Character> digitChars = new java.util.HashSet<>();
+        java.util.Set<Character> specialChars = new java.util.HashSet<>();
+
+        for (int i = 0; i < 1000; i++) {
+            lowerChars.add(AsciiUtil.getRandomLower(secureRandom));
+            upperChars.add(AsciiUtil.getRandomUpper(secureRandom));
+            digitChars.add(AsciiUtil.getRandomDigit(secureRandom));
+            specialChars.add(AsciiUtil.getRandomSpecialCharacter(secureRandom));
+        }
+
+        // Should generate at least 10 different characters of each type
+        Assertions.assertTrue(lowerChars.size() >= 10, "Insufficient variety in lowercase letters");
+        Assertions.assertTrue(upperChars.size() >= 10, "Insufficient variety in uppercase letters");
+        Assertions.assertTrue(digitChars.size() >= 5, "Insufficient variety in digits");
+        Assertions.assertTrue(specialChars.size() >= 10, "Insufficient variety in special characters");
     }
 }

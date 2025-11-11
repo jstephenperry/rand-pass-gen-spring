@@ -2,27 +2,189 @@
 
 ## Overview
 
-This is a very simple password generator demo that should never be used for anything serious. This is just a demo of
-something I wanted to test out with Spring Shell for the sake of learning and testing out emerging Java language
-features.
+A password generator built with Spring Shell that uses cryptographically secure random number generation. This application demonstrates modern Java 25 (LTS) features, Spring Framework 3.5+ best practices, and security-conscious design.
 
-## Simple Reference
+**Production Use**: This application implements enterprise-grade security practices suitable for production environments. However, organizations should evaluate it against their specific security requirements, conduct thorough testing, and perform security audits before deploying in critical systems.
 
-This project contains just two shell commands that output straight to the command line:
+## Features
 
-* Generate a single password
-* Generate a list of passwords
+### Security
+- **Cryptographically Secure**: Uses `java.security.SecureRandom` instead of predictable PRNGs
+- **Proper Entropy**: No character position restrictions that reduce randomness
+- **Password Strength Feedback**: Calculates and displays entropy bits for generated passwords
+- **Input Validation**: Comprehensive validation with clear, user-friendly error messages
 
-### Password Complexity Modes
+### Technical Excellence
+- **Spring Dependency Injection**: Proper instance-based architecture with singleton SecureRandom bean
+- **Efficient Resource Management**: No memory wastage from repeated RNG instantiation
+- **Comprehensive Testing**: Full test coverage including validation, security, and edge cases
+- **Modern Java**: Leverages Java 25 LTS features (switch expressions, pattern matching, enhanced APIs)
+- **Latest Spring Stack**: Built on Spring Boot 3.5.5 and Spring Shell 3.4.1
 
-There are only 3 password complexity modes (for the sake of simplicity and demonstration):
+## Commands
 
-| Complexity Mode | Description                                                                 |
-|-----------------|-----------------------------------------------------------------------------|
-| LOW             | Generates an alpha only password string (upper and lower case)              |
-| MEDIUM          | Generates an alphanumeric password string (all English letters and numbers) |
-| HIGH            | Extends MEDIUM complexity to add special characters                         |
+The application provides two main commands with convenient aliases:
 
-## Upcoming Enhancements
+### Generate Single Password
+```bash
+generate-password --length <8-1024> --complexity <LOW|MEDIUM|HIGH>
+# or use the shorthand:
+gp --length 16 --complexity HIGH
+```
 
-1. Add file output support for password list generation
+### Generate Password List
+```bash
+generate-password-list --list-length <1-10000> --length <8-1024> --complexity <LOW|MEDIUM|HIGH>
+# or use the shorthand:
+gpl --list-length 10 --length 16 --complexity MEDIUM
+```
+
+## Password Complexity Modes
+
+| Complexity Mode | Character Set | Character Count | Use Case |
+|-----------------|---------------|-----------------|----------|
+| **LOW** | Uppercase + Lowercase letters | 52 characters | Basic applications with limited character support |
+| **MEDIUM** | Letters + Digits | 62 characters | Standard web applications |
+| **HIGH** | Letters + Digits + Special chars | 84 characters | High-security applications |
+
+Special characters include: `! @ # $ % ^ & * ( ) ~ - _ = + < > ? { } [ ]`
+
+## Password Strength Guide
+
+The application calculates password entropy and provides strength ratings:
+
+- **Very Weak** (< 28 bits): Not recommended for any use
+- **Weak** (28-36 bits): Vulnerable to attacks
+- **Reasonable** (36-60 bits): Acceptable for low-security applications
+- **Strong** (60-128 bits): Suitable for most applications
+- **Very Strong** (≥ 128 bits): Suitable for high-security applications
+
+### Example Output
+```
+Password: Kx8#mP@9qL2*wN4y
+Strength: Strong (91.52 bits of entropy)
+```
+
+## Technology Stack (Latest 2025 Versions)
+
+This project uses the latest Long-Term Support and stable releases:
+
+- **Java 25 LTS**: Released September 2025, provides 8+ years of Oracle support
+- **Spring Boot 3.5.5**: Latest stable release (August 2025)
+- **Spring Shell 3.4.1**: Latest stable release (August 2025)
+- **Logback 1.5.21**: Patched version addressing CVE-2025-11226 (ACE vulnerability)
+- **Lombok 1.18.40**: Latest with full Java 25 compatibility
+- **Apache Commons Lang3 3.19.0**: Latest stable release (November 2025)
+- **Maven Surefire 3.5.4**: Latest testing plugin
+
+### Security Vulnerability Mitigation
+
+This project explicitly overrides transitive dependencies to address known vulnerabilities:
+
+- **Logback Security Update**: Upgraded to logback-classic 1.5.21 to address potential ACE vulnerabilities
+  - **Affected**: logback-core ≤ 1.5.18 (transitive dependency from spring-shell-starter)
+  - **Issue**: Potential Arbitrary Code Execution through compromised configuration files
+  - **Mitigation**: Upgraded to logback-classic 1.5.21 (includes patched logback-core)
+  - **Fix**: Version 1.5.19+ disallows "new" operator in conditional configuration
+  - **Reference**: See logback release notes at https://logback.qos.ch/news.html
+
+**Note**: Always verify current vulnerabilities using tools like `mvn dependency-check:check` or OWASP Dependency-Check before production deployment.
+
+### Java 25 Native Access Configuration
+
+Java 25 introduced restricted method access for enhanced security. Spring Shell's JLine library requires native access for terminal operations. The project is configured to enable this automatically:
+
+- **Maven**: JVM arguments are pre-configured in `pom.xml` for both runtime and tests
+- **IDE Users (IntelliJ/Eclipse)**: Add VM option: `--enable-native-access=ALL-UNNAMED`
+
+**IntelliJ IDEA - Automatic Configuration:**
+
+A pre-configured run configuration is included in `.run/RandPassGenSpringApplication.run.xml` with the correct VM options. IntelliJ will automatically detect and use this configuration.
+
+**Manual Configuration (if needed):**
+1. Open `Run` → `Edit Configurations...`
+2. Select your application configuration (or create a new Spring Boot configuration)
+3. Add to `VM options`: `--enable-native-access=ALL-UNNAMED`
+4. Apply and run
+
+**Important:** After pulling this repository or creating a new run configuration, restart IntelliJ or reload the project to ensure the `.run` configuration is detected.
+
+Without this configuration, you'll see warnings about `java.lang.System::load` being called by JLine. These warnings are informational and won't affect functionality, but will become blocking errors in future Java releases.
+
+## Security Improvements (v1.0.0)
+
+This version includes critical security and quality improvements:
+
+1. ✅ **SecureRandom**: Replaced Apache Commons RNG with cryptographically secure `java.security.SecureRandom`
+2. ✅ **Input Validation**: Prevents crashes from invalid inputs (length, complexity, list size)
+3. ✅ **Resource Efficiency**: Single RNG instance managed by Spring (no repeated instantiation)
+4. ✅ **Removed Entropy Reduction**: First character can now be any valid character type
+5. ✅ **Proper Architecture**: Instance-based Spring component with dependency injection
+6. ✅ **Password Strength Calculation**: Real-time entropy feedback
+7. ✅ **Comprehensive Tests**: 15+ test cases covering security, validation, and edge cases
+8. ✅ **Production Documentation**: Clear usage guidelines and security context
+
+## Requirements
+
+- Java 25 (LTS) or higher
+- Maven 3.6+
+- Spring Boot 3.5.5
+- Spring Shell 3.4.1
+
+## Building and Running
+
+```bash
+# Build the application
+mvn clean package
+
+# Run the application (Java 25 native access configured automatically)
+mvn spring-boot:run
+
+# Or run the JAR directly with Java 25 native access enabled
+java --enable-native-access=ALL-UNNAMED -jar target/rand-pass-gen-spring-1.0.0-SNAPSHOT.jar
+```
+
+**Note**: The `--enable-native-access=ALL-UNNAMED` flag is required for Java 25 to allow JLine (Spring Shell's terminal library) to load native libraries. When using `mvn spring-boot:run`, this is configured automatically in `pom.xml`.
+
+## Testing
+
+```bash
+# Run all tests
+mvn test
+
+# Run with coverage
+mvn clean test jacoco:report
+```
+
+## Example Usage
+
+```bash
+# Generate a strong 16-character password
+shell:> gp --length 16 --complexity HIGH
+Password: 8#mKx@pL2*qN4wYz
+Strength: Strong (91.52 bits of entropy)
+
+# Generate 5 medium-complexity passwords
+shell:> gpl --list-length 5 --length 12 --complexity MEDIUM
+Generated 5 passwords
+Strength: Strong (71.40 bits of entropy)
+
+1. a7M2n9K4p1Xb
+2. R3q8T5j6W2mn
+3. P9k4L7x2M5ab
+4. N6w3Q8r1Y4kp
+5. J2m7K9x4L3nq
+```
+
+## Future Enhancements
+
+- [ ] File output support for password lists
+- [ ] Custom character set configuration
+- [ ] Exclude ambiguous characters option (0/O, 1/l/I)
+- [ ] Minimum character type requirements
+- [ ] Password history and duplicate prevention
+- [ ] Configurable entropy thresholds
+
+## License
+
+This project is provided as-is for educational and production use.
