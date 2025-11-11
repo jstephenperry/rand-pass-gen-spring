@@ -64,12 +64,18 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!-- Java 25: Enable native access for JLine terminal library used by Spring Shell -->
+                    <jvmArguments>--enable-native-access=ALL-UNNAMED</jvmArguments>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.4</version>
                 <configuration>
+                    <!-- Java 25: Enable native access for JLine terminal library -->
+                    <argLine>--enable-native-access=ALL-UNNAMED</argLine>
                     <systemPropertyVariables>
                         <jacoco-agent.destfile>${jacoco.ut.execution.data.file}</jacoco-agent.destfile>
                     </systemPropertyVariables>

@@ -84,6 +84,21 @@ This project explicitly overrides transitive dependencies to address known vulne
   - **Mitigation**: Upgraded to logback-classic 1.5.21 (includes patched logback-core)
   - **Fixed in**: Version 1.5.19+ (disallows "new" operator in conditional configuration)
 
+### Java 25 Native Access Configuration
+
+Java 25 introduced restricted method access for enhanced security. Spring Shell's JLine library requires native access for terminal operations. The project is configured to enable this automatically:
+
+- **Maven**: JVM arguments are pre-configured in `pom.xml` for both runtime and tests
+- **IDE Users (IntelliJ/Eclipse)**: Add VM option: `--enable-native-access=ALL-UNNAMED`
+
+**IntelliJ IDEA Configuration:**
+1. Open `Run` → `Edit Configurations...`
+2. Select your application configuration
+3. Add to `VM options`: `--enable-native-access=ALL-UNNAMED`
+4. Apply and run
+
+Without this configuration, you'll see warnings about `java.lang.System::load` being called by JLine. These warnings are informational and won't affect functionality, but will become blocking errors in future Java releases.
+
 ## Security Improvements (v1.0.0)
 
 This version includes critical security and quality improvements:
@@ -110,12 +125,14 @@ This version includes critical security and quality improvements:
 # Build the application
 mvn clean package
 
-# Run the application
+# Run the application (Java 25 native access configured automatically)
 mvn spring-boot:run
 
-# Or run the JAR directly
-java -jar target/rand-pass-gen-spring-1.0.0-SNAPSHOT.jar
+# Or run the JAR directly with Java 25 native access enabled
+java --enable-native-access=ALL-UNNAMED -jar target/rand-pass-gen-spring-1.0.0-SNAPSHOT.jar
 ```
+
+**Note**: The `--enable-native-access=ALL-UNNAMED` flag is required for Java 25 to allow JLine (Spring Shell's terminal library) to load native libraries. When using `mvn spring-boot:run`, this is configured automatically in `pom.xml`.
 
 ## Testing
 
