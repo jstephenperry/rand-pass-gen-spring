@@ -10,9 +10,9 @@
     </parent>
     <groupId>com.jstephenperry</groupId>
     <artifactId>rand-pass-gen-spring</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <name>rand-pass-gen-spring</name>
-    <description>Simple Spring Shell Password Generator</description>
+    <description>Production-ready Spring Shell Password Generator with Cryptographically Secure Random Number Generation</description>
     <properties>
         <java.version>17</java.version>
         <lombok.version>1.18.30</lombok.version>
@@ -37,11 +37,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.13.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-rng-simple</artifactId>
-            <version>1.5</version>
         </dependency>
     </dependencies>
     <dependencyManagement>
