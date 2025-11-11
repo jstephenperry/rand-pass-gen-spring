@@ -71,7 +71,7 @@ This project uses the latest Long-Term Support and stable releases:
 - **Spring Boot 3.5.5**: Latest stable release (August 2025)
 - **Spring Shell 3.4.1**: Latest stable release (August 2025)
 - **Lombok 1.18.40**: Latest with full Java 25 compatibility
-- **Apache Commons Lang3 3.20.0**: Latest stable release
+- **Apache Commons Lang3 3.19.0**: Latest stable release (November 2025)
 - **Maven Surefire 3.5.4**: Latest testing plugin
 
 ## Security Improvements (v1.0.0)
