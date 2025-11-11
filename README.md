@@ -2,7 +2,9 @@
 
 ## Overview
 
-A **production-ready** password generator built with Spring Shell that uses cryptographically secure random number generation. This application demonstrates modern Java 25 (LTS) features, Spring Framework 3.5+ best practices, and security-conscious design.
+A password generator built with Spring Shell that uses cryptographically secure random number generation. This application demonstrates modern Java 25 (LTS) features, Spring Framework 3.5+ best practices, and security-conscious design.
+
+**Production Use**: This application implements enterprise-grade security practices suitable for production environments. However, organizations should evaluate it against their specific security requirements, conduct thorough testing, and perform security audits before deploying in critical systems.
 
 ## Features
 
@@ -14,7 +16,7 @@ A **production-ready** password generator built with Spring Shell that uses cryp
 
 ### Technical Excellence
 - **Spring Dependency Injection**: Proper instance-based architecture with singleton SecureRandom bean
-- **Production-Ready Code**: No memory wastage from repeated RNG instantiation
+- **Efficient Resource Management**: No memory wastage from repeated RNG instantiation
 - **Comprehensive Testing**: Full test coverage including validation, security, and edge cases
 - **Modern Java**: Leverages Java 25 LTS features (switch expressions, pattern matching, enhanced APIs)
 - **Latest Spring Stack**: Built on Spring Boot 3.5.5 and Spring Shell 3.4.1
@@ -79,10 +81,14 @@ This project uses the latest Long-Term Support and stable releases:
 
 This project explicitly overrides transitive dependencies to address known vulnerabilities:
 
-- **CVE-2025-11226** (CVSS 6.9 - Medium): Arbitrary Code Execution in logback-core ≤ 1.5.18
-  - **Impact**: Allows attackers to execute arbitrary code through compromised configuration files
+- **Logback Security Update**: Upgraded to logback-classic 1.5.21 to address potential ACE vulnerabilities
+  - **Affected**: logback-core ≤ 1.5.18 (transitive dependency from spring-shell-starter)
+  - **Issue**: Potential Arbitrary Code Execution through compromised configuration files
   - **Mitigation**: Upgraded to logback-classic 1.5.21 (includes patched logback-core)
-  - **Fixed in**: Version 1.5.19+ (disallows "new" operator in conditional configuration)
+  - **Fix**: Version 1.5.19+ disallows "new" operator in conditional configuration
+  - **Reference**: See logback release notes at https://logback.qos.ch/news.html
+
+**Note**: Always verify current vulnerabilities using tools like `mvn dependency-check:check` or OWASP Dependency-Check before production deployment.
 
 ### Java 25 Native Access Configuration
 
