@@ -2,7 +2,7 @@
 
 ## Overview
 
-A **production-ready** password generator built with Spring Shell that uses cryptographically secure random number generation. This application demonstrates modern Java 17 features, Spring Framework best practices, and security-conscious design.
+A **production-ready** password generator built with Spring Shell that uses cryptographically secure random number generation. This application demonstrates modern Java 25 (LTS) features, Spring Framework 3.5+ best practices, and security-conscious design.
 
 ## Features
 
@@ -16,7 +16,8 @@ A **production-ready** password generator built with Spring Shell that uses cryp
 - **Spring Dependency Injection**: Proper instance-based architecture with singleton SecureRandom bean
 - **Production-Ready Code**: No memory wastage from repeated RNG instantiation
 - **Comprehensive Testing**: Full test coverage including validation, security, and edge cases
-- **Modern Java**: Leverages Java 17 features (switch expressions, records-style patterns)
+- **Modern Java**: Leverages Java 25 LTS features (switch expressions, pattern matching, enhanced APIs)
+- **Latest Spring Stack**: Built on Spring Boot 3.5.5 and Spring Shell 3.4.1
 
 ## Commands
 
@@ -62,6 +63,17 @@ Password: Kx8#mP@9qL2*wN4y
 Strength: Strong (91.52 bits of entropy)
 ```
 
+## Technology Stack (Latest 2025 Versions)
+
+This project uses the latest Long-Term Support and stable releases:
+
+- **Java 25 LTS**: Released September 2025, provides 8+ years of Oracle support
+- **Spring Boot 3.5.5**: Latest stable release (August 2025)
+- **Spring Shell 3.4.1**: Latest stable release (August 2025)
+- **Lombok 1.18.40**: Latest with full Java 25 compatibility
+- **Apache Commons Lang3 3.20.0**: Latest stable release
+- **Maven Surefire 3.5.4**: Latest testing plugin
+
 ## Security Improvements (v1.0.0)
 
 This version includes critical security and quality improvements:
@@ -77,8 +89,10 @@ This version includes critical security and quality improvements:
 
 ## Requirements
 
-- Java 17 or higher
+- Java 25 (LTS) or higher
 - Maven 3.6+
+- Spring Boot 3.5.5
+- Spring Shell 3.4.1
 
 ## Building and Running
 
