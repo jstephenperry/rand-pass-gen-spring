@@ -5,18 +5,19 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.5</version>
+        <version>3.5.5</version>
         <relativePath/>
     </parent>
     <groupId>com.jstephenperry</groupId>
     <artifactId>rand-pass-gen-spring</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <name>rand-pass-gen-spring</name>
-    <description>Simple Spring Shell Password Generator</description>
+    <description>Production-ready Spring Shell Password Generator with Cryptographically Secure Random Number Generation</description>
     <properties>
-        <java.version>17</java.version>
-        <lombok.version>1.18.30</lombok.version>
-        <spring-shell.version>3.1.4</spring-shell.version>
+        <java.version>25</java.version>
+        <lombok.version>1.18.40</lombok.version>
+        <spring-shell.version>3.4.1</spring-shell.version>
+        <logback.version>1.5.21</logback.version>
         <jacoco.ut.execution.data.file>target/jacoco.exec</jacoco.ut.execution.data.file>
     </properties>
     <dependencies>
@@ -36,12 +37,15 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.13.0</version>
+            <version>3.19.0</version>
         </dependency>
+        <!-- Security: Override logback-core transitive dependency from spring-shell-starter -->
+        <!-- Addresses ACE vulnerability in logback-core <= 1.5.18. Fixed in 1.5.19+. -->
+        <!-- Using 1.5.21 for latest security patches and improvements. -->
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-rng-simple</artifactId>
-            <version>1.5</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
         </dependency>
     </dependencies>
     <dependencyManagement>
@@ -61,12 +65,19 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!-- Java 25: Enable native access for JLine terminal library used by Spring Shell -->
+                    <jvmArguments>--enable-native-access=ALL-UNNAMED</jvmArguments>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.2</version>
+                <version>3.5.4</version>
                 <configuration>
+                    <!-- Java 25: Enable native access for JLine terminal library -->
+                    <!-- @{argLine} allows JaCoCo to prepend its own arguments for code coverage -->
+                    <argLine>@{argLine} --enable-native-access=ALL-UNNAMED</argLine>
                     <systemPropertyVariables>
                         <jacoco-agent.destfile>${jacoco.ut.execution.data.file}</jacoco-agent.destfile>
                     </systemPropertyVariables>

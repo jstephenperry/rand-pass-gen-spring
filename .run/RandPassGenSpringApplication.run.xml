@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="RandPassGenSpringApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <option name="ACTIVE_PROFILES" />
+    <module name="rand-pass-gen-spring" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.jstephenperry.randpassgenspring.RandPassGenSpringApplication" />
+    <option name="VM_PARAMETERS" value="--enable-native-access=ALL-UNNAMED" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
