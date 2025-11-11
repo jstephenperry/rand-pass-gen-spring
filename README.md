@@ -70,9 +70,19 @@ This project uses the latest Long-Term Support and stable releases:
 - **Java 25 LTS**: Released September 2025, provides 8+ years of Oracle support
 - **Spring Boot 3.5.5**: Latest stable release (August 2025)
 - **Spring Shell 3.4.1**: Latest stable release (August 2025)
+- **Logback 1.5.21**: Patched version addressing CVE-2025-11226 (ACE vulnerability)
 - **Lombok 1.18.40**: Latest with full Java 25 compatibility
 - **Apache Commons Lang3 3.19.0**: Latest stable release (November 2025)
 - **Maven Surefire 3.5.4**: Latest testing plugin
+
+### Security Vulnerability Mitigation
+
+This project explicitly overrides transitive dependencies to address known vulnerabilities:
+
+- **CVE-2025-11226** (CVSS 6.9 - Medium): Arbitrary Code Execution in logback-core ≤ 1.5.18
+  - **Impact**: Allows attackers to execute arbitrary code through compromised configuration files
+  - **Mitigation**: Upgraded to logback-classic 1.5.21 (includes patched logback-core)
+  - **Fixed in**: Version 1.5.19+ (disallows "new" operator in conditional configuration)
 
 ## Security Improvements (v1.0.0)
 
