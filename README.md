@@ -91,11 +91,17 @@ Java 25 introduced restricted method access for enhanced security. Spring Shell'
 - **Maven**: JVM arguments are pre-configured in `pom.xml` for both runtime and tests
 - **IDE Users (IntelliJ/Eclipse)**: Add VM option: `--enable-native-access=ALL-UNNAMED`
 
-**IntelliJ IDEA Configuration:**
+**IntelliJ IDEA - Automatic Configuration:**
+
+A pre-configured run configuration is included in `.run/RandPassGenSpringApplication.run.xml` with the correct VM options. IntelliJ will automatically detect and use this configuration.
+
+**Manual Configuration (if needed):**
 1. Open `Run` → `Edit Configurations...`
-2. Select your application configuration
+2. Select your application configuration (or create a new Spring Boot configuration)
 3. Add to `VM options`: `--enable-native-access=ALL-UNNAMED`
 4. Apply and run
+
+**Important:** After pulling this repository or creating a new run configuration, restart IntelliJ or reload the project to ensure the `.run` configuration is detected.
 
 Without this configuration, you'll see warnings about `java.lang.System::load` being called by JLine. These warnings are informational and won't affect functionality, but will become blocking errors in future Java releases.
 
