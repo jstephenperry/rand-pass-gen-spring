@@ -3,18 +3,17 @@ package com.jstephenperry.randpassgenspring;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
-import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Production-ready password generator using cryptographically secure random number generation.
+ * Password generator using cryptographically secure random number generation.
  * Generates passwords with configurable length and complexity levels.
+ * Suitable for production use with proper security considerations.
  */
 @ShellComponent
-@Component
 public class RandomPasswordGenerator {
 
     private static final int MIN_PASSWORD_LENGTH = 8;
@@ -83,14 +82,14 @@ public class RandomPasswordGenerator {
     }
 
     /**
-     * Internal method to generate a password based on complexity level.
-     * No first-character restrictions - any character type can appear anywhere.
+     * Generates a password based on complexity level.
      *
      * @param length     the password length
      * @param complexity the complexity enum
      * @return the generated password
      */
     private String generatePasswordInternal(int length, PasswordComplexityEnum complexity) {
+        // Implementation note: No first-character restrictions for maximum entropy
         StringBuilder builder = new StringBuilder(length);
         SecureRandom random = secureRandomProvider.getSecureRandom();
 
@@ -198,4 +197,3 @@ public class RandomPasswordGenerator {
         return new PasswordStrength(entropy);
     }
 }
-

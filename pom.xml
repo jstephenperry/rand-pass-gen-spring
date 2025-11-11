@@ -39,8 +39,9 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.19.0</version>
         </dependency>
-        <!-- Security: Override vulnerable logback-core transitive dependency from spring-shell-starter -->
-        <!-- CVE-2025-11226: ACE vulnerability fixed in 1.5.19+. Using 1.5.21 for latest patches. -->
+        <!-- Security: Override logback-core transitive dependency from spring-shell-starter -->
+        <!-- Addresses ACE vulnerability in logback-core <= 1.5.18. Fixed in 1.5.19+. -->
+        <!-- Using 1.5.21 for latest security patches and improvements. -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
@@ -75,7 +76,8 @@
                 <version>3.5.4</version>
                 <configuration>
                     <!-- Java 25: Enable native access for JLine terminal library -->
-                    <argLine>--enable-native-access=ALL-UNNAMED</argLine>
+                    <!-- @{argLine} allows JaCoCo to prepend its own arguments for code coverage -->
+                    <argLine>@{argLine} --enable-native-access=ALL-UNNAMED</argLine>
                     <systemPropertyVariables>
                         <jacoco-agent.destfile>${jacoco.ut.execution.data.file}</jacoco-agent.destfile>
                     </systemPropertyVariables>
