@@ -1,4 +1,6 @@
-package com.jstephenperry.randpassgenspring;
+package com.jstephenperry.randpassgenspring.credentials.generate;
+
+import com.jstephenperry.randpassgenspring.platform.web.ApiErrors;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

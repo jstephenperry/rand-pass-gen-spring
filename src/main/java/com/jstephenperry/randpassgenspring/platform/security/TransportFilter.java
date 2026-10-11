@@ -1,4 +1,6 @@
-package com.jstephenperry.randpassgenspring;
+package com.jstephenperry.randpassgenspring.platform.security;
+
+import com.jstephenperry.randpassgenspring.platform.web.ApiErrors;
 
 import java.io.IOException;
 

@@ -1,4 +1,4 @@
-package com.jstephenperry.randpassgenspring;
+package com.jstephenperry.randpassgenspring.credentials.generate;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 
 @RestController
-public final class CredentialController {
+final class CredentialController {
 	private final RandomPasswordGenerator generator;
 
 	public CredentialController(RandomPasswordGenerator generator) {

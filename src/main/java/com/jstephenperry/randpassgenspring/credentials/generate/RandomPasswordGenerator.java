@@ -1,4 +1,4 @@
-package com.jstephenperry.randpassgenspring;
+package com.jstephenperry.randpassgenspring.credentials.generate;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 /** Generates opaque service credentials from independent CSPRNG bytes. */
 @Service
-public final class RandomPasswordGenerator {
+final class RandomPasswordGenerator {
 	public static final int DEFAULT_BYTE_LENGTH = 32;
 	public static final int MAX_BYTE_LENGTH = 128;
 	public static final int MAX_COUNT = 100;

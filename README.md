@@ -173,6 +173,33 @@ then builds the container and retains the JAR and coverage report as workflow
 artifacts. CI does not deploy or publish to a package registry. Dependabot tracks
 Maven, container and GitHub Actions updates.
 
+## Code organization
+
+Code is organized by use case, with tests in matching packages:
+
+```text
+com.jstephenperry.randpassgenspring
+├── RandPassGenSpringApplication
+├── credentials.generate
+│   ├── CredentialController, GenerateRequest, GeneratedCredentials
+│   ├── RandomPasswordGenerator
+│   └── GenerationSecurityConfiguration, GenerationRequestFilter, RequestLimits
+└── platform
+    ├── security   JWT validation, transport policy and fallback authorization
+    └── web        Sanitized HTTP error responses
+```
+
+The generation slice owns the complete request-to-response flow, including its
+scope requirement and admission limits. Its types are package-private so other
+features cannot couple to its implementation. Shared platform code has no
+dependencies on feature packages. The application class remains at the root so
+Spring discovers each slice and the platform configuration.
+
+The generation security chain matches its endpoint first. The platform fallback
+chain permits health probes and denies all remaining routes. Both chains apply
+the same stateless JWT and HTTPS policy. New use cases should get their own
+feature package instead of adding global controller/service/DTO directories.
+
 ## Migration from 1.x
 
 Version 2 replaces Spring Shell commands (`gp`, `gpl`) and LOW/MEDIUM/HIGH complexity

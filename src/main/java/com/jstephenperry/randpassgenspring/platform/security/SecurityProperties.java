@@ -1,4 +1,4 @@
-package com.jstephenperry.randpassgenspring;
+package com.jstephenperry.randpassgenspring.platform.security;
 
 import java.net.URI;
 

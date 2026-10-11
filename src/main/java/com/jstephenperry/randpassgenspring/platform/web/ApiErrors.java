@@ -1,4 +1,4 @@
-package com.jstephenperry.randpassgenspring;
+package com.jstephenperry.randpassgenspring.platform.web;
 
 import java.io.IOException;
 
@@ -17,7 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ApiErrors extends ResponseEntityExceptionHandler {
 	// Only fixed, server-owned messages may be passed here. Never echo tokens or
 	// request content.
-	static void write(HttpServletResponse response, int status, String title) throws IOException {
+	public static void write(HttpServletResponse response, int status, String title) throws IOException {
 		response.setStatus(status);
 		response.setContentType("application/problem+json");
 		response.setHeader("Cache-Control", "no-store");

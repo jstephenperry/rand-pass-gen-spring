@@ -1,4 +1,4 @@
-package com.jstephenperry.randpassgenspring;
+package com.jstephenperry.randpassgenspring.credentials.generate;
 
 import static org.junit.jupiter.api.Assertions.*;
 

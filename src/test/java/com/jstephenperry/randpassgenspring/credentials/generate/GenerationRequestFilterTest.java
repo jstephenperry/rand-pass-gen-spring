@@ -1,4 +1,4 @@
-package com.jstephenperry.randpassgenspring;
+package com.jstephenperry.randpassgenspring.credentials.generate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-class RequestProtectionTest {
+class GenerationRequestFilterTest {
     @Test
     void bucketRefillsUsingMonotonicTimeAndNeverExceedsBurst() {
         var time = new AtomicLong();
@@ -35,25 +35,6 @@ class RequestProtectionTest {
         assertEquals(429, response.getStatus());
         assertEquals("1", response.getHeader("Retry-After"));
         assertEquals("no-store", response.getHeader("Cache-Control"));
-    }
-
-    @Test
-    void transportRejectsForgedForwardedHeaders() throws Exception {
-        var request = new MockHttpServletRequest("POST", "/v1/credentials");
-        request.addHeader("X-Forwarded-Proto", "https");
-        var response = new MockHttpServletResponse();
-        new TransportFilter(false).doFilter(request, response, (req, res) -> fail("Must require TLS"));
-        assertEquals(403, response.getStatus());
-        assertTrue(response.getContentAsString().contains("HTTPS required"));
-    }
-
-    @Test
-    void requiresValidHttpsIdentityEndpointsByDefault() {
-        assertTrue(new SecurityProperties("https://idp.example", "https://idp.example/keys", "api", false).isTransportValid());
-        assertFalse(new SecurityProperties("http://idp.example", "https://idp.example/keys", "api", false).isTransportValid());
-        assertFalse(new SecurityProperties("https://user:pass@idp.example", "https://idp.example/keys", "api", false).isTransportValid());
-        assertFalse(new SecurityProperties(null, "https://idp.example/keys", "api", false).isTransportValid());
-        assertFalse(new SecurityProperties("%%%", "https://idp.example/keys", "api", false).isTransportValid());
     }
 
     @Test
