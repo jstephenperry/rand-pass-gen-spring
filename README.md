@@ -1,190 +1,183 @@
-# Random Password Generator - Spring Shell
+# Service credential generator
 
-## Overview
+A stateless HTTP service that generates cryptographically random credentials for
+service-to-service communication. Java 25 LTS, Spring Boot 4.1.1, Maven 3.9.16.
+Tomcat is pinned to 11.0.25 for the [security fixes](https://tomcat.apache.org/security-11.html)
+not yet included in Spring Boot 4.1.1's managed Tomcat version.
 
-A password generator built with Spring Shell that uses cryptographically secure random number generation. This application demonstrates modern Java 25 (LTS) features, Spring Framework 3.5+ best practices, and security-conscious design.
+The service generates credentials only. Callers own scheduling, credential storage,
+distribution, validation, expiry and rotation. There is no database, secret-manager
+integration, credential registry or background rotation task. Generated credentials
+are opaque shared secrets, not JWTs or OAuth access tokens. The JWT used to authorize
+an API call is supplied by your existing identity provider and is separate from the
+credential returned by this service.
 
-**Production Use**: This application implements enterprise-grade security practices suitable for production environments. However, organizations should evaluate it against their specific security requirements, conduct thorough testing, and perform security audits before deploying in critical systems.
+## API
 
-## Features
+`POST /v1/credentials` with `Content-Type: application/json` and
+`Authorization: Bearer <access-token>`. Send `{}` to use the defaults.
 
-### Security
-- **Cryptographically Secure**: Uses `java.security.SecureRandom` instead of predictable PRNGs
-- **Proper Entropy**: No character position restrictions that reduce randomness
-- **Password Strength Feedback**: Calculates and displays entropy bits for generated passwords
-- **Input Validation**: Comprehensive validation with clear, user-friendly error messages
-
-### Technical Excellence
-- **Spring Dependency Injection**: Proper instance-based architecture with singleton SecureRandom bean
-- **Efficient Resource Management**: No memory wastage from repeated RNG instantiation
-- **Comprehensive Testing**: Full test coverage including validation, security, and edge cases
-- **Modern Java**: Leverages Java 25 LTS features (switch expressions, pattern matching, enhanced APIs)
-- **Latest Spring Stack**: Built on Spring Boot 3.5.5 and Spring Shell 3.4.1
-
-## Commands
-
-The application provides two main commands with convenient aliases:
-
-### Generate Single Password
-```bash
-generate-password --length <8-1024> --complexity <LOW|MEDIUM|HIGH>
-# or use the shorthand:
-gp --length 16 --complexity HIGH
+```json
+{"byteLength":32,"count":1}
 ```
 
-### Generate Password List
-```bash
-generate-password-list --list-length <1-10000> --length <8-1024> --complexity <LOW|MEDIUM|HIGH>
-# or use the shorthand:
-gpl --list-length 10 --length 16 --complexity MEDIUM
+| Field | Default | Allowed values |
+| --- | --- | --- |
+| `byteLength` | 32 | Integer, 32–128 random bytes per credential |
+| `count` | 1 | Integer, 1–100 credentials per request |
+
+Omitted or `null` fields use their defaults. Unknown fields, fractional numbers,
+string-to-number coercion, trailing JSON, query parameters and encoded/compressed
+request bodies are rejected. The request body is limited to 1,024 bytes, including
+chunked transfers.
+
+Response (`credentials` values below are placeholders):
+
+```json
+{
+  "credentials": ["<43-character-base64url-credential>"],
+  "entropyBits": 256,
+  "encoding": "base64url"
+}
 ```
 
-## Password Complexity Modes
+Each credential encodes exactly `byteLength` independent `SecureRandom` bytes using
+unpadded Base64url (`A–Z`, `a–z`, `0–9`, `-`, `_`). Default output is 43 characters;
+128 bytes produces 171 characters. `entropyBits` is per credential and equals
+`8 * byteLength`. There are no character-category quotas or biased alphabet draws.
+Callers must support opaque credentials, including leading `-` or `_`.
 
-| Complexity Mode | Character Set | Character Count | Use Case |
-|-----------------|---------------|-----------------|----------|
-| **LOW** | Uppercase + Lowercase letters | 52 characters | Basic applications with limited character support |
-| **MEDIUM** | Letters + Digits | 62 characters | Standard web applications |
-| **HIGH** | Letters + Digits + Special chars | 84 characters | High-security applications |
+Every successful call returns fresh credentials. Retries are **not idempotent**;
+there is no way to recover a previously returned credential. Successful responses
+are HTTP 200. Responses carry `Cache-Control: no-store`. The service never stores
+credentials or logs generated values; response `toString()` is redacted. Strings
+must exist temporarily for JSON serialization and cannot be reliably wiped from
+JVM memory. Temporary random byte buffers are cleared even on failure.
 
-Special characters include: `! @ # $ % ^ & * ( ) ~ - _ = + < > ? { } [ ]`
+| Status | Meaning |
+| --- | --- |
+| 400 | Invalid request or unsupported parameters |
+| 401 | Missing, expired or invalid bearer token |
+| 403 | Missing scope, disallowed route/method, or HTTPS required |
+| 413 | Body exceeds 1,024 bytes |
+| 415 | Unsupported content type |
+| 429 | Instance admission limit exceeded; `Retry-After: 1` |
+| 500 | Generation failed; no credentials returned |
 
-## Password Strength Guide
+Error responses use `application/problem+json` without echoing supplied tokens,
+request contents, exception messages or stack traces. Consult [openapi.yaml](openapi.yaml)
+for the contract.
 
-The application calculates password entropy and provides strength ratings:
+## Build and test
 
-- **Very Weak** (< 28 bits): Not recommended for any use
-- **Weak** (28-36 bits): Vulnerable to attacks
-- **Reasonable** (36-60 bits): Acceptable for low-security applications
-- **Strong** (60-128 bits): Suitable for most applications
-- **Very Strong** (≥ 128 bits): Suitable for high-security applications
+Install a current patched **JDK 25** and set `JAVA_HOME`. Java 25 is the latest LTS
+as of September 2026 ([Oracle roadmap](https://www.oracle.com/java/technologies/java-se-support-roadmap.html)).
+The Maven wrapper pins Maven 3.9.16 and its distribution checksum.
 
-### Example Output
-```
-Password: Kx8#mP@9qL2*wN4y
-Strength: Strong (91.52 bits of entropy)
-```
-
-## Technology Stack (Latest 2025 Versions)
-
-This project uses the latest Long-Term Support and stable releases:
-
-- **Java 25 LTS**: Released September 2025, provides 8+ years of Oracle support
-- **Spring Boot 3.5.5**: Latest stable release (August 2025)
-- **Spring Shell 3.4.1**: Latest stable release (August 2025)
-- **Logback 1.5.21**: Patched version addressing CVE-2025-11226 (ACE vulnerability)
-- **Lombok 1.18.40**: Latest with full Java 25 compatibility
-- **Apache Commons Lang3 3.19.0**: Latest stable release (November 2025)
-- **Maven Surefire 3.5.4**: Latest testing plugin
-
-### Security Vulnerability Mitigation
-
-This project explicitly overrides transitive dependencies to address known vulnerabilities:
-
-- **Logback Security Update**: Upgraded to logback-classic 1.5.21 to address potential ACE vulnerabilities
-  - **Affected**: logback-core ≤ 1.5.18 (transitive dependency from spring-shell-starter)
-  - **Issue**: Potential Arbitrary Code Execution through compromised configuration files
-  - **Mitigation**: Upgraded to logback-classic 1.5.21 (includes patched logback-core)
-  - **Fix**: Version 1.5.19+ disallows "new" operator in conditional configuration
-  - **Reference**: See logback release notes at https://logback.qos.ch/news.html
-
-**Note**: Always verify current vulnerabilities using tools like `mvn dependency-check:check` or OWASP Dependency-Check before production deployment.
-
-### Java 25 Native Access Configuration
-
-Java 25 introduced restricted method access for enhanced security. Spring Shell's JLine library requires native access for terminal operations. The project is configured to enable this automatically:
-
-- **Maven**: JVM arguments are pre-configured in `pom.xml` for both runtime and tests
-- **IDE Users (IntelliJ/Eclipse)**: Add VM option: `--enable-native-access=ALL-UNNAMED`
-
-**IntelliJ IDEA - Automatic Configuration:**
-
-A pre-configured run configuration is included in `.run/RandPassGenSpringApplication.run.xml` with the correct VM options. IntelliJ will automatically detect and use this configuration.
-
-**Manual Configuration (if needed):**
-1. Open `Run` → `Edit Configurations...`
-2. Select your application configuration (or create a new Spring Boot configuration)
-3. Add to `VM options`: `--enable-native-access=ALL-UNNAMED`
-4. Apply and run
-
-**Important:** After pulling this repository or creating a new run configuration, restart IntelliJ or reload the project to ensure the `.run` configuration is detected.
-
-Without this configuration, you'll see warnings about `java.lang.System::load` being called by JLine. These warnings are informational and won't affect functionality, but will become blocking errors in future Java releases.
-
-## Security Improvements (v1.0.0)
-
-This version includes critical security and quality improvements:
-
-1. ✅ **SecureRandom**: Replaced Apache Commons RNG with cryptographically secure `java.security.SecureRandom`
-2. ✅ **Input Validation**: Prevents crashes from invalid inputs (length, complexity, list size)
-3. ✅ **Resource Efficiency**: Single RNG instance managed by Spring (no repeated instantiation)
-4. ✅ **Removed Entropy Reduction**: First character can now be any valid character type
-5. ✅ **Proper Architecture**: Instance-based Spring component with dependency injection
-6. ✅ **Password Strength Calculation**: Real-time entropy feedback
-7. ✅ **Comprehensive Tests**: 15+ test cases covering security, validation, and edge cases
-8. ✅ **Production Documentation**: Clear usage guidelines and security context
-
-## Requirements
-
-- Java 25 (LTS) or higher
-- Maven 3.6+
-- Spring Boot 3.5.5
-- Spring Shell 3.4.1
-
-## Building and Running
-
-```bash
-# Build the application
-mvn clean package
-
-# Run the application (Java 25 native access configured automatically)
-mvn spring-boot:run
-
-# Or run the JAR directly with Java 25 native access enabled
-java --enable-native-access=ALL-UNNAMED -jar target/rand-pass-gen-spring-1.0.0-SNAPSHOT.jar
+```sh
+./mvnw --batch-mode clean verify
 ```
 
-**Note**: The `--enable-native-access=ALL-UNNAMED` flag is required for Java 25 to allow JLine (Spring Shell's terminal library) to load native libraries. When using `mvn spring-boot:run`, this is configured automatically in `pom.xml`.
+Windows: `mvnw.cmd clean verify`. Tests include an actual HTTP server and locally
+signed JWTs, and need no external identity provider. Coverage is written to
+`target/site/jacoco/index.html`; the executable JAR is
+`target/rand-pass-gen-spring-2.0.0-SNAPSHOT.jar`.
 
-## Testing
+## Configure and run
 
-```bash
-# Run all tests
-mvn test
+Required deployment configuration:
 
-# Run with coverage
-mvn clean test jacoco:report
+```sh
+export CREDENTIAL_JWT_ISSUER=https://identity.example.com/realms/services
+export CREDENTIAL_JWT_JWK_SET_URI=https://identity.example.com/realms/services/protocol/openid-connect/certs
+export CREDENTIAL_JWT_AUDIENCE=credential-generator
 ```
 
-## Example Usage
+Obtain an RS256-signed JWT from that issuer through your existing service identity
+flow. It must have `sub`, `exp`, the configured `iss` and `aud`, and scope
+`credentials.generate` (space-delimited `scope`, or the supported `scp` claim).
+Signatures, issuer, audience, expiry and not-before are validated; the standard
+Spring Security timestamp skew allowance is 60 seconds. JWK retrieval uses bounded
+connect/read timeouts and cached public keys. Missing identity configuration fails
+startup. No identity-provider credentials are held by this application.
 
-```bash
-# Generate a strong 16-character password
-shell:> gp --length 16 --complexity HIGH
-Password: 8#mKx@pL2*qN4wYz
-Strength: Strong (91.52 bits of entropy)
+Configure HTTPS using your deployment's certificate, for example with a mounted
+PKCS12 keystore and Spring Boot SSL settings:
 
-# Generate 5 medium-complexity passwords
-shell:> gpl --list-length 5 --length 12 --complexity MEDIUM
-Generated 5 passwords
-Strength: Strong (71.40 bits of entropy)
-
-1. a7M2n9K4p1Xb
-2. R3q8T5j6W2mn
-3. P9k4L7x2M5ab
-4. N6w3Q8r1Y4kp
-5. J2m7K9x4L3nq
+```sh
+export SERVER_SSL_ENABLED=true
+export SERVER_SSL_KEY_STORE=file:/run/tls/service.p12
+export SERVER_SSL_KEY_STORE_TYPE=PKCS12
+# Supply SERVER_SSL_KEY_STORE_PASSWORD through your deployment secret mechanism.
+java -jar target/rand-pass-gen-spring-2.0.0-SNAPSHOT.jar
 ```
 
-## Future Enhancements
+The default listener is port 8080. Plain HTTP generation requests are rejected
+without redirects. Forwarded headers are ignored by default, so clients cannot
+bypass the transport check by setting `X-Forwarded-Proto`.
 
-- [ ] File output support for password lists
-- [ ] Custom character set configuration
-- [ ] Exclude ambiguous characters option (0/O, 1/l/I)
-- [ ] Minimum character type requirements
-- [ ] Password history and duplicate prevention
-- [ ] Configurable entropy thresholds
+If TLS terminates at a trusted ingress, use encrypted ingress-to-service transport,
+or configure trusted-proxy handling explicitly for your network. For local tests
+or a separately secured private transport boundary, the explicit setting
+`CREDENTIAL_SECURITY_ALLOW_INSECURE_HTTP=true` permits HTTP, including HTTP identity
+URLs. It does **not** disable JWT validation. Do not expose that listener publicly.
+Never disable client certificate verification to work around trust configuration.
 
-## License
+Example request (configure your client to supply the bearer token securely):
 
-This project is provided as-is for educational and production use.
+```http
+POST /v1/credentials HTTP/1.1
+Host: credentials.example.com
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{"byteLength":32,"count":1}
+```
+
+Consumers should keep response bodies out of application logs, traces, shell output
+and caches. This also applies to ingress, APM and HTTP wire logging. Avoid debug/trace
+logging in production; the supplied configuration keeps application logging at INFO
+and disables access logging and detailed request logging.
+
+## Operations
+
+- Unauthenticated `GET /actuator/health/liveness` and `/actuator/health/readiness`
+  return status only. All other routes, including other actuator endpoints, are denied.
+- Default admission control is 50 requests/second per instance with a burst of 100,
+  applied after authorization. Configure `CREDENTIAL_LIMITS_REQUESTS_PER_SECOND`
+  and `CREDENTIAL_LIMITS_BURST` (each 1–10,000). These are local limits, not tenant
+  quotas or a distributed DDoS control; use ingress limits for those needs.
+- Tomcat connections, threads, request headers and connection timeouts are bounded.
+  The application handles graceful shutdown with a 20-second shutdown budget.
+- No generated credentials appear in metrics tags. Probes indicate process readiness,
+  not identity-provider availability or credential consumption by downstream services.
+- Do not enable heap dumps, core dumps or request/response recording in a deployment
+  that cannot protect those artifacts as secrets.
+- Deploy with resource limits, private ingress and a patched Java 25 runtime. Rebuild
+  container images regularly; the Java 25 base tags track patch updates. Pin approved
+  image digests in your deployment release process.
+
+```sh
+docker build -t credential-generator:local .
+docker run --rm --read-only --tmpfs /tmp:rw,noexec,nosuid,size=64m \
+  --cap-drop ALL --security-opt no-new-privileges --memory 512m --cpus 1 \
+  -p 127.0.0.1:8080:8080 \
+  --env-file /path/to/deployment.env \
+  --mount type=bind,src=/path/to/tls,dst=/run/tls,readonly \
+  credential-generator:local
+```
+
+The container runs as UID/GID 10001. Mounted TLS material must be readable by that
+identity. CI builds and tests on Java 25 for PRs, main/master pushes and releases,
+then builds the container and retains the JAR and coverage report as workflow
+artifacts. CI does not deploy or publish to a package registry. Dependabot tracks
+Maven, container and GitHub Actions updates.
+
+## Migration from 1.x
+
+Version 2 replaces Spring Shell commands (`gp`, `gpl`) and LOW/MEDIUM/HIGH complexity
+modes with the JSON HTTP API. Length now means random **bytes**, with a minimum of
+256 bits, rather than password characters. Spring Shell, Lombok and Commons Lang
+are removed. There are no native-access JVM flags or manual Logback overrides.
+
+MIT licensed; see [LICENSE.txt](LICENSE.txt).

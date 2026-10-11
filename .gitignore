@@ -4,6 +4,7 @@ target/
 !**/src/test/**/target/
 
 ### STS ###
+/bin/
 .apt_generated
 .classpath
 .factorypath
@@ -31,3 +32,8 @@ build/
 ### Other ###
 .vscode/
 /*.log
+.env
+*.p12
+*.jks
+*.pem
+*.key
