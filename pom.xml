@@ -20,7 +20,7 @@
              https://tomcat.apache.org/security-11.html -->
         <tomcat.version>11.0.25</tomcat.version>
         <argLine/>
-        <jacoco.version>0.8.15</jacoco.version>
+        <jacoco.version>0.8.16</jacoco.version>
     </properties>
     <dependencies>
         <dependency>
